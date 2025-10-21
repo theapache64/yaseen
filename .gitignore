@@ -172,7 +172,6 @@ build
 gpm.json
 .kotlin
 .DS_Store
-*.apk
 *.aab
 kotlin-js-store
 .idea/ChatHistory_schema_v2.xml
