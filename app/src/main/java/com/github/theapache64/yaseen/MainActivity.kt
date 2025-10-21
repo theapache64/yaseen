@@ -10,6 +10,7 @@ import android.view.Window
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.viewpager2.adapter.FragmentStateAdapter
@@ -88,6 +89,10 @@ class PageFragment() : Fragment() {
 
             }
 
+            val tvPagePosition = TextView(ctx).apply{
+                text = "${position + 1}/${yaseen.size}"
+            }
+
             val btn = if (position == yaseen.lastIndex) {
                 Button(ctx).apply {
                     layoutParams = FrameLayout.LayoutParams(
@@ -109,6 +114,7 @@ class PageFragment() : Fragment() {
             // root
             FrameLayout(ctx).apply {
                 addView(ivPage)
+                addView(tvPagePosition)
                 if (btn != null) {
                     addView(btn)
                 }
