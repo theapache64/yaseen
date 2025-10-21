@@ -10,8 +10,8 @@
 
 > Surah Yaseen - Ad Free and Lightweight (3.2MB)
 
-## Download
-
+## 📂 Download
+- https://github.com/theapache64/yaseen/releases/download/1.0.0/app-release.apk
 
 ## ✍️ Author
 
