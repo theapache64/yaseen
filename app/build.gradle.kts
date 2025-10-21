@@ -37,4 +37,7 @@ android {
 
 dependencies {
 
+
+    // ViewPager2 : AndroidX Widget ViewPager2
+    implementation("androidx.viewpager2:viewpager2:1.1.0")
 }
