@@ -1,6 +1,7 @@
 package com.github.theapache64.yaseen
 
 import android.annotation.SuppressLint
+import android.graphics.ColorMatrixColorFilter
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -30,6 +31,7 @@ val yaseen = arrayOf(
 
 class MainActivity : FragmentActivity() {
 
+    private lateinit var pagerAdapter: PagerAdapter
     private val vpYaseen by lazy {
         findViewById<ViewPager2>(R.id.vp_yaseen)
     }
@@ -39,16 +41,9 @@ class MainActivity : FragmentActivity() {
         requestWindowFeature(Window.FEATURE_NO_TITLE)
         setContentView(R.layout.activity_main)
 
-        val adapter = object : FragmentStateAdapter(this) {
-            override fun createFragment(position: Int): Fragment {
-                return PageFragment.newInstance(position)
-            }
-
-            override fun getItemCount(): Int = yaseen.size
-        }
-
+        this.pagerAdapter = PagerAdapter(this)
         vpYaseen.apply {
-            this.adapter = adapter
+            this.adapter = pagerAdapter
             this.layoutDirection = ViewPager2.LAYOUT_DIRECTION_RTL
         }
     }
@@ -56,15 +51,50 @@ class MainActivity : FragmentActivity() {
     fun goToFirstPage() {
         vpYaseen.setCurrentItem(0, true)
     }
+
+    fun toggleNightMode() {
+        println("QuickTag: MainActivity:toggleNightMode: Toggling night mode")
+        // Cycle through all filter types
+        pagerAdapter.filterType = when (pagerAdapter.filterType) {
+            FilterType.NONE -> FilterType.INVERT
+            FilterType.INVERT -> FilterType.SEPIA
+            FilterType.SEPIA -> FilterType.WARM
+            FilterType.WARM -> FilterType.NONE
+        }
+        vpYaseen.adapter = pagerAdapter
+    }
+}
+
+class PagerAdapter(fragmentActivity: FragmentActivity) : FragmentStateAdapter(fragmentActivity) {
+    // Default based on time
+    var filterType: FilterType = FilterType.NONE
+
+    init {
+        val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+        // night invert, day none, evening sepia
+        filterType = when (hour) {
+            in 6..17 -> FilterType.NONE
+            in 18..20 -> FilterType.SEPIA
+            else -> FilterType.INVERT
+        }
+    }
+
+    override fun createFragment(position: Int): Fragment {
+        return PageFragment.newInstance(position, filterType)
+    }
+
+    override fun getItemCount(): Int = yaseen.size
 }
 
 class PageFragment() : Fragment() {
     companion object {
         private const val KEY_PAGE = "page"
-        fun newInstance(page: Int): PageFragment {
+        private const val KEY_FILTER_TYPE = "filter_type"
+        fun newInstance(page: Int, filterType: FilterType): PageFragment {
             return PageFragment().apply {
                 arguments = Bundle().apply {
                     putInt(KEY_PAGE, page)
+                    putString(KEY_FILTER_TYPE, filterType.name)
                 }
             }
         }
@@ -75,6 +105,7 @@ class PageFragment() : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         val position = arguments?.getInt(KEY_PAGE) ?: -1
+        val filterType = arguments?.getString(KEY_FILTER_TYPE) ?: FilterType.NONE.name
         val layout = context?.let { ctx ->
             val ivPage = ImageView(ctx).apply {
                 // full screen
@@ -86,10 +117,32 @@ class PageFragment() : Fragment() {
 
                 // image
                 setImageResource(yaseen[position])
+                when (filterType) {
+                    FilterType.INVERT.name -> {
+                        invertColors()
+                    }
+
+                    FilterType.SEPIA.name -> {
+                        applySepia()
+                    }
+
+                    FilterType.WARM.name -> {
+                        applyWarmFilter()
+                    }
+
+                    FilterType.NONE.name -> {
+                        // No filter
+                        clearColorFilter()
+                    }
+                }
+
+                setOnClickListener {
+                    (activity as MainActivity).toggleNightMode()
+                }
 
             }
 
-            val tvPagePosition = TextView(ctx).apply{
+            val tvPagePosition = TextView(ctx).apply {
                 text = "${position + 1}/${yaseen.size}"
             }
 
@@ -123,4 +176,44 @@ class PageFragment() : Fragment() {
 
         return layout
     }
+
+}
+
+enum class FilterType {
+    NONE,
+    INVERT,
+    SEPIA,
+    WARM
+}
+
+
+fun ImageView.invertColors() {
+    val invertMatrix = floatArrayOf(
+        -1.0f, 0.0f, 0.0f, 0.0f, 255.0f,
+        0.0f, -1.0f, 0.0f, 0.0f, 255.0f,
+        0.0f, 0.0f, -1.0f, 0.0f, 255.0f,
+        0.0f, 0.0f, 0.0f, 1.0f, 0.0f
+    )
+    val colorFilter = ColorMatrixColorFilter(invertMatrix)
+    this.colorFilter = colorFilter
+}
+
+fun ImageView.applySepia() {
+    val sepiaMatrix = floatArrayOf(
+        0.393f, 0.769f, 0.189f, 0f, 0f,
+        0.349f, 0.686f, 0.168f, 0f, 0f,
+        0.272f, 0.534f, 0.131f, 0f, 0f,
+        0f, 0f, 0f, 1f, 0f
+    )
+    this.colorFilter = ColorMatrixColorFilter(sepiaMatrix)
+}
+
+fun ImageView.applyWarmFilter(intensity: Float = 0.3f) {
+    val warmMatrix = floatArrayOf(
+        1f, 0f, 0f, 0f, 0f,
+        0f, 1f - intensity * 0.2f, 0f, 0f, 0f,
+        0f, 0f, 1f - intensity, 0f, 0f,
+        0f, 0f, 0f, 1f, 0f
+    )
+    this.colorFilter = ColorMatrixColorFilter(warmMatrix)
 }
