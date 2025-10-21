@@ -1,5 +1,6 @@
 package com.github.theapache64.yaseen
 
+import android.R.attr.text
 import android.annotation.SuppressLint
 import android.graphics.ColorMatrixColorFilter
 import android.os.Bundle
@@ -61,7 +62,11 @@ class MainActivity : FragmentActivity() {
             FilterType.SEPIA -> FilterType.WARM
             FilterType.WARM -> FilterType.NONE
         }
-        vpYaseen.adapter = pagerAdapter
+        supportFragmentManager.fragments.forEach { fragment ->
+            if (fragment is PageFragment) {
+                fragment.updateFilter(pagerAdapter.filterType)
+            }
+        }
     }
 }
 
@@ -87,6 +92,8 @@ class PagerAdapter(fragmentActivity: FragmentActivity) : FragmentStateAdapter(fr
 }
 
 class PageFragment() : Fragment() {
+    private  var ivPage: ImageView? = null
+
     companion object {
         private const val KEY_PAGE = "page"
         private const val KEY_FILTER_TYPE = "filter_type"
@@ -107,7 +114,7 @@ class PageFragment() : Fragment() {
         val position = arguments?.getInt(KEY_PAGE) ?: -1
         val filterType = arguments?.getString(KEY_FILTER_TYPE) ?: FilterType.NONE.name
         val layout = context?.let { ctx ->
-            val ivPage = ImageView(ctx).apply {
+            this.ivPage = ImageView(ctx).apply {
                 // full screen
                 layoutParams = ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
@@ -117,30 +124,14 @@ class PageFragment() : Fragment() {
 
                 // image
                 setImageResource(yaseen[position])
-                when (filterType) {
-                    FilterType.INVERT.name -> {
-                        invertColors()
-                    }
-
-                    FilterType.SEPIA.name -> {
-                        applySepia()
-                    }
-
-                    FilterType.WARM.name -> {
-                        applyWarmFilter()
-                    }
-
-                    FilterType.NONE.name -> {
-                        // No filter
-                        clearColorFilter()
-                    }
-                }
 
                 setOnClickListener {
                     (activity as MainActivity).toggleNightMode()
+                    true
                 }
 
             }
+            updateFilter(FilterType.valueOf(filterType))
 
             val tvPagePosition = TextView(ctx).apply {
                 text = "${position + 1}/${yaseen.size}"
@@ -175,6 +166,28 @@ class PageFragment() : Fragment() {
         }
 
         return layout
+    }
+
+    fun updateFilter(filterType: FilterType) {
+        ivPage?.let { imageView ->
+            when (filterType) {
+                FilterType.INVERT -> {
+                    imageView.invertColors()
+                }
+
+                FilterType.SEPIA -> {
+                    imageView.applySepia()
+                }
+
+                FilterType.WARM -> {
+                    imageView.applyWarmFilter()
+                }
+
+                FilterType.NONE -> {
+                    imageView.clearColorFilter()
+                }
+            }
+        }
     }
 
 }
