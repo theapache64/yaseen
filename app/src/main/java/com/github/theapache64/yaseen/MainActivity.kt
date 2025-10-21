@@ -71,6 +71,7 @@ class PageFragment : Fragment() {
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
             scaleType = ImageView.ScaleType.FIT_XY
+            scaleX = 1.1f
 
             // image
             setImageResource(yaseen[position])
