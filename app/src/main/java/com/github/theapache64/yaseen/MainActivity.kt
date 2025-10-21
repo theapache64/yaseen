@@ -32,6 +32,7 @@ class MainActivity : FragmentActivity() {
     private val vpYaseen by lazy {
         findViewById<ViewPager2>(R.id.vp_yaseen)
     }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -70,17 +71,14 @@ class PageFragment() : Fragment() {
 
     @SuppressLint("SetTextI18n")
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         val position = arguments?.getInt(KEY_PAGE) ?: -1
         val layout = context?.let { ctx ->
             val ivPage = ImageView(ctx).apply {
                 // full screen
                 layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
                 )
                 scaleType = ImageView.ScaleType.FIT_XY
                 scaleX = 1.1f
@@ -93,8 +91,7 @@ class PageFragment() : Fragment() {
             val btn = if (position == yaseen.lastIndex) {
                 Button(ctx).apply {
                     layoutParams = FrameLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.WRAP_CONTENT
+                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
                     ).apply {
                         gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
                     }
