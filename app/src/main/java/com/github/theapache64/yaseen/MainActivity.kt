@@ -76,8 +76,8 @@ class PagerAdapter(fragmentActivity: FragmentActivity) : FragmentStateAdapter(fr
         val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
         // night invert, day none, evening sepia
         filterType = when (hour) {
-            in 6..17 -> FilterType.WARM
-            in 18..20 -> FilterType.SEPIA
+            in 6..17 -> FilterType.SEPIA
+            in 18..20 -> FilterType.WARM
             else -> FilterType.INVERT
         }
     }
