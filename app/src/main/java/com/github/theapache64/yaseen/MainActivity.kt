@@ -56,10 +56,9 @@ class MainActivity : FragmentActivity() {
         println("QuickTag: MainActivity:toggleNightMode: Toggling night mode")
         // Cycle through all filter types
         pagerAdapter.filterType = when (pagerAdapter.filterType) {
-            FilterType.NONE -> FilterType.INVERT
             FilterType.INVERT -> FilterType.SEPIA
             FilterType.SEPIA -> FilterType.WARM
-            FilterType.WARM -> FilterType.NONE
+            FilterType.WARM -> FilterType.INVERT
         }
         supportFragmentManager.fragments.forEach { fragment ->
             if (fragment is PageFragment) {
@@ -71,13 +70,13 @@ class MainActivity : FragmentActivity() {
 
 class PagerAdapter(fragmentActivity: FragmentActivity) : FragmentStateAdapter(fragmentActivity) {
     // Default based on time
-    var filterType: FilterType = FilterType.NONE
+    var filterType: FilterType
 
     init {
         val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
         // night invert, day none, evening sepia
         filterType = when (hour) {
-            in 6..17 -> FilterType.NONE
+            in 6..17 -> FilterType.WARM
             in 18..20 -> FilterType.SEPIA
             else -> FilterType.INVERT
         }
@@ -111,7 +110,7 @@ class PageFragment() : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         val position = arguments?.getInt(KEY_PAGE) ?: -1
-        val filterType = arguments?.getString(KEY_FILTER_TYPE) ?: FilterType.NONE.name
+        val filterType = arguments?.getString(KEY_FILTER_TYPE) ?: FilterType.WARM.name
         val layout = context?.let { ctx ->
             this.ivPage = ImageView(ctx).apply {
                 // full screen
@@ -186,10 +185,6 @@ class PageFragment() : Fragment() {
                 FilterType.WARM -> {
                     imageView.applyWarmFilter()
                 }
-
-                FilterType.NONE -> {
-                    imageView.clearColorFilter()
-                }
             }
         }
     }
@@ -197,7 +192,6 @@ class PageFragment() : Fragment() {
 }
 
 enum class FilterType {
-    NONE,
     INVERT,
     SEPIA,
     WARM
