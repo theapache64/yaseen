@@ -1,6 +1,5 @@
 package com.github.theapache64.yaseen
 
-import android.R.attr.text
 import android.annotation.SuppressLint
 import android.graphics.ColorMatrixColorFilter
 import android.os.Bundle
@@ -92,7 +91,7 @@ class PagerAdapter(fragmentActivity: FragmentActivity) : FragmentStateAdapter(fr
 }
 
 class PageFragment() : Fragment() {
-    private  var ivPage: ImageView? = null
+    private var ivPage: ImageView? = null
 
     companion object {
         private const val KEY_PAGE = "page"
@@ -125,9 +124,14 @@ class PageFragment() : Fragment() {
                 // image
                 setImageResource(yaseen[position])
 
+                var lastClickTime = 0L
                 setOnClickListener {
-                    (activity as MainActivity).toggleNightMode()
-                    true
+                    val now = System.currentTimeMillis()
+                    if (now - lastClickTime < 300) {
+                        // Double click detected
+                        (activity as MainActivity).toggleNightMode()
+                    }
+                    lastClickTime = now
                 }
 
             }
